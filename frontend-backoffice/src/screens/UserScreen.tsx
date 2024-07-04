@@ -42,15 +42,17 @@ export function UserScreen() {
     if (!user.data) return;
 
     Object.entries(user.data).map(([key, value]) => {
-      // @ts-expect-error: I know exactly what I'm doing ok?
-      form.setValue(key, value)
+      if (key !== 'password') {
+        // @ts-expect-error: I know exactly what I'm doing ok?
+        form.setValue(key, value);
+      }
     })
   }, [user.data])
 
   if (!user.data) return 'Carregando...'
 
   return (
-    <Box>
+    <Box style={{padding: 12, display:"flex", flexDirection:"column" ,gap:16}}>
       <Box>
         <TextField label="Username" {...form.register('username')} fullWidth />
       </Box>

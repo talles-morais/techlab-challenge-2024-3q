@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import { User } from "../entities/User.js";
 import { database } from "../services/database.js";
+import bcrypt from "bcrypt"
 
 export class UsersController {
   protected get repository() {
@@ -36,7 +37,13 @@ export class UsersController {
    * PUT /users
    */
   public async save(req: Request, res: Response) {
-    const user = await this.repository.save(req.body)
+    const saltRounds = 10;
+    const hashedPassword = await bcrypt.hash(req.body.password, saltRounds);
+    const newUser = {
+      ...req.body,
+      password: hashedPassword
+    }
+    const user = await this.repository.save(newUser)
 
     res.status(201)
       .header('Location', `/users/${user.id}`)

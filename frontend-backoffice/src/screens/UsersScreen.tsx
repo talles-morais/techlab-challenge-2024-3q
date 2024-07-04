@@ -1,12 +1,18 @@
 import { useQuery } from "@tanstack/react-query"
 import { api } from "../services/api.js"
-import { useAccessToken } from "../hooks/useAuthenticationContext.js"
+import { useAccessToken, useAuthenticatedUser } from "../hooks/useAuthenticationContext.js"
 import { IUser } from "../interfaces/IUser.js"
 import { Box, Typography } from "@mui/material"
 import { Link } from "react-router-dom"
 
 export function UsersScreen() {
   const accessToken = useAccessToken()
+  const user = useAuthenticatedUser();
+
+  if(user.profile !== "sudo"){
+    return <div><p>Standard Profile</p></div>
+  }
+
   const query = useQuery({
     queryKey: ['users'],
     queryFn: async () => {
@@ -25,8 +31,8 @@ export function UsersScreen() {
 
   return (
     <>
-      <Box>
-        {users?.map(user => (
+      <Box style={{ padding: 12 }}>
+        {user.profile === "sudo" && users?.map(user => (
           <Link to={`/users/${user.id}`}>
             <Box key={`users:${user.id}`}>
               <Typography>
