@@ -148,6 +148,16 @@ export class ConsumersController {
 
     const messages: Record<string, unknown>[] = Array.isArray(req.body?.messages) ? req.body.messages : []
 
+    const userList = await database.getRepository('users').find({
+      where: { profile: 'standard' }
+    });
+
+    if (userList.length === 0)
+      return res.status(500).json({ message: "No users available" });
+
+    console.log(userList);
+    
+
     const conversation = await database.getRepository(Conversation).save({
       consumer,
       messages: messages.map((message, index) => {
@@ -173,6 +183,7 @@ export class ConsumersController {
         })
       }),
       subject: req.body.subject,
+      user: userList[0]
     })
 
     res.status(201)

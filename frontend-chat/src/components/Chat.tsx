@@ -160,7 +160,7 @@ export function Chat() {
   useEffect(() => {
     if (conversationQuery.isLoading) return;
 
-    if (conversation !== null) return;7
+    if (conversation !== null) return;
     
     pushTemporaryConversationMessage({ by: 'system', content: 'Qual o assunto do atendimento?' })
 
