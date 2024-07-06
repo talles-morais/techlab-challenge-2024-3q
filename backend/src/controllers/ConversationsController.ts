@@ -15,9 +15,10 @@ export class ConversationsController {
    */
   public async find(req: Request, res: Response) {
     const [conversations, count] = await this.repository.findAndCount({
-      relations: { consumer: true },
+      relations: { consumer: true, user:true },
       take: 25,
-      skip: 0
+      skip: 0,
+
     })
 
     res.json({ count, conversations })

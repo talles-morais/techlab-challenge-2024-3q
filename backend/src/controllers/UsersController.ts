@@ -44,6 +44,7 @@ export class UsersController {
       password: hashedPassword
     }
     const user = await this.repository.save(newUser)
+    console.log(user);
 
     res.status(201)
       .header('Location', `/users/${user.id}`)
