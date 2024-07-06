@@ -6,6 +6,7 @@ import jwt from 'jsonwebtoken'
 import { APP_NAME, SECRET } from "../constants/env.js";
 import { FindOptionsWhere } from "typeorm";
 import { ConversationMessage, ConversationMessageBy } from "../entities/ConversationMessage.js";
+import { getNextIndex } from "../tools/roundRobin.js";
 export class ConsumersController {
   protected get repository() {
     return database.getRepository(Consumer)
@@ -155,8 +156,11 @@ export class ConsumersController {
     if (userList.length === 0)
       return res.status(500).json({ message: "No users available" });
 
-    console.log(userList);
-    
+    if (userList.length === 0)
+      return res.status(500).json({ message: "No users available" });
+
+    const userIndex = getNextIndex(userList.length);
+    if (userIndex === -1) return res.status(500).json({ message: "User list is empty" });
 
     const conversation = await database.getRepository(Conversation).save({
       consumer,
@@ -183,7 +187,7 @@ export class ConsumersController {
         })
       }),
       subject: req.body.subject,
-      user: userList[0]
+      user: userList[userIndex]
     })
 
     res.status(201)
