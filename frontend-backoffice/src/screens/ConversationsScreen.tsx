@@ -33,7 +33,7 @@ export function ConversationsScreen() {
     return query.data?.count ?? NaN
   }, [query.data?.count])
 
-  const handlePageChange = (event: React.ChangeEvent<unknown>, value: number) => {
+  const handlePageChange = ( _: any, value: number) => {
     setPage(value);
   };
 
@@ -42,8 +42,7 @@ export function ConversationsScreen() {
 
   return (
     <Grid container pl={0.1}>
-      <Grid
-      >
+      <Grid padding={10}>
         <Box
           style={{
             display: 'flex',

@@ -1,6 +1,6 @@
 import { Box, Grid, List, ListItem, Skeleton, TextField, Typography } from "@mui/material";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { api } from "../services/api.js";
 import { IConversation } from "../interfaces/IConversation.js";
 import { IConversationMessage } from "../interfaces/IConversationMessage.js";
@@ -16,6 +16,7 @@ interface IConversationMessageInput {
 }
 
 export function ConversationScreen() {
+  const navigate = useNavigate();
   const params = useParams()
   const conversationId = params.conversationId
   const scrollRef = useRef<HTMLElement>(null)
@@ -115,19 +116,27 @@ export function ConversationScreen() {
 
   if (!conversation.data) throw new Error('Failed to laod conversation')
 
+  const handleCloseConversation = () => {
+    navigate('/conversations', { replace: true, state: { forceRefresh: true } })
+    window.location.reload()
+  }
+
   return (
     <Box display='flex' flexDirection='column' height='100vh' py={2}>
-      <Box>
-        <Typography variant='h5'>{conversation.data.subject}</Typography>
-        {conversation.data.consumer.name && <Typography variant='subtitle1'>{conversation.data.consumer.name}</Typography>}
-        <Typography variant='subtitle1'>{conversation.data.consumer.document}</Typography>
+      <Box display='flex' justifyContent='space-between' paddingX={10}>
+        <Box>
+          <Typography variant='h5'>{conversation.data.subject}</Typography>
+          {conversation.data.consumer.name && <Typography variant='subtitle1'>{conversation.data.consumer.name}</Typography>}
+          <Typography variant='subtitle1'>{conversation.data.consumer.document}</Typography>
+        </Box>
+        <CloseIcon onClick={handleCloseConversation} />
       </Box>
       <Box maxHeight='80%' overflow='hidden scroll' ref={scrollRef}>
         <List>
           {messages.map((message) => (
             <ListItem key={`messages:${message.id}`}>
               <Typography variant='body1'>{message.content}</Typography>
-              <span style={{ width: 5 }}/>
+              <span style={{ width: 5 }} />
               <Typography variant='overline'>- {new Date(message.createdAt).toLocaleString()}</Typography>
             </ListItem>
           ))}
@@ -136,7 +145,7 @@ export function ConversationScreen() {
       <Box mt='auto' px={4}>
         <Grid container spacing={2}>
           <Grid item sm={10}>
-            <TextField {...form.register('content')} multiline fullWidth onSubmit={submit} onKeyUp={handleKeyPress}/>
+            <TextField {...form.register('content')} multiline fullWidth onSubmit={submit} onKeyUp={handleKeyPress} />
           </Grid>
           <Grid item sm={1} mt='auto'>
             <LoadingButton loading={send.isPending} variant="contained" style={{ padding: 16 }} startIcon={<SendIcon />} onClick={submit}>
