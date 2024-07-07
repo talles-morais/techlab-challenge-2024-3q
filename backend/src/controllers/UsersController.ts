@@ -60,11 +60,17 @@ export class UsersController {
 
     if (!user) return res.status(404).json({ message: `Not found User with ID ${req.params.userId}` })
 
-    await this.repository.save(
-      this.repository.merge(user, req.body)
-    )
+    const updatedUser = { ...req.body }
 
-    res.json(user)
+    if(req.body.password) {
+      const saltRounds = 10;
+      updatedUser.password = await bcrypt.hash(req.body.password, saltRounds);
+    }
+
+    const mergedUser = this.repository.merge(user, updatedUser)
+    await this.repository.save(mergedUser)
+
+    res.json(mergedUser)
   }
 
   /**

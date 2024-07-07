@@ -19,7 +19,7 @@ export function UserScreen() {
 
   const save = useMutation({
     mutationFn: async (user: Partial<IUser>) => {
-      await api.put(`/users`, { ...user, id: self.crypto.randomUUID() }, {
+      await api.patch(`/users/${user.id}`, { ...user }, {
         headers: { Authorization: `Bearer ${accessToken}` }
       })
     }

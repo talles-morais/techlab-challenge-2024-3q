@@ -32,6 +32,17 @@ export function UsersScreen() {
   return (
     <>
       <Box style={{ padding: 12 }}>
+        {user.profile === "sudo" && 
+          <Box >
+          <Link to={'/users'}>
+            <Box>
+              <Typography>
+                Create new user
+              </Typography>
+            </Box>
+          </Link>
+          </Box>
+        }
         {user.profile === "sudo" && users?.map(user => (
           <Link to={`/users/${user.id}`}>
             <Box key={`users:${user.id}`}>
