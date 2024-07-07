@@ -11,6 +11,7 @@ import { logger } from './middlewares/logger.js'
 
 export const app = Express()
 
+
 app.use(logger)
 app.use(cors())
 app.use(Express.json())

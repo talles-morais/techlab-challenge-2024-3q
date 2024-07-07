@@ -8,6 +8,9 @@ import { api } from "../services/api";
 import { IConversationMessage } from "../interfaces/IConversationMessage";
 import { useForm } from "react-hook-form";
 import SendIcon from '@mui/icons-material/Send';
+import { io } from "socket.io-client";
+
+const socket = io('http://localhost:8080')
 
 export interface TemporaryConversationMessage {
   id: string
@@ -114,7 +117,8 @@ export function Chat() {
         { headers: { Authorization: `Bearer ${accessToken}` } }
       )
 
-      messagesQuery.refetch()
+      socket.emit('sendMessage', conversationMessageInput.content);
+      messagesQuery.refetch();
     },
     onSuccess: () => messagesQuery.refetch()
   })
@@ -166,6 +170,17 @@ export function Chat() {
 
     subjectQuestionOpen.current = true
   }, [conversationQuery.isLoading, conversation])
+
+  useEffect(() => {
+    socket.on('receiveMessage', () => {
+      messagesQuery.refetch();
+    });
+
+    return () => {
+      socket.off('receiveMessage');
+      socket.off('conversationClosed');
+    };
+  }, [messagesQuery]);
 
   return (
     <Box display='flex' flexDirection='column' height='100vh' py={2}>

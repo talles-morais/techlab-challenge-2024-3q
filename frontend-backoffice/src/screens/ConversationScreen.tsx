@@ -10,6 +10,9 @@ import { useForm } from "react-hook-form";
 import SendIcon from '@mui/icons-material/Send.js';
 import CloseIcon from '@mui/icons-material/Close.js';
 import { LoadingButton } from "@mui/lab";
+import { io } from "socket.io-client";
+
+const socket = io('http://localhost:8080')
 
 interface IConversationMessageInput {
   content: string
@@ -48,7 +51,7 @@ export function ConversationScreen() {
         messages: IConversationMessage[]
       }
     },
-    refetchInterval: 100
+    refetchInterval: 20 * 1000
   })
 
   const send = useMutation({
@@ -58,6 +61,7 @@ export function ConversationScreen() {
         { content: conversationMessageInput.content },
         { headers: { Authorization: `Bearer ${accessToken}` } }
       )
+      socket.emit('sendMessage', conversationMessageInput.content)
     },
     onSuccess: () => messagesQuery.refetch()
   })
@@ -68,6 +72,7 @@ export function ConversationScreen() {
         `/conversations/${conversationId}`,
         { headers: { Authorization: `Bearer ${accessToken}` } }
       )
+      socket.emit('closeConversation', conversationId);
     },
     onSuccess: () => messagesQuery.refetch()
   })
@@ -110,6 +115,22 @@ export function ConversationScreen() {
     scrollRef.current.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" })
   }, [messages])
 
+  useEffect(() => {
+    socket.on('receiveMessage', () => {
+      messagesQuery.refetch();
+    })
+
+    socket.on('conversationClosed', () => {
+      navigate('/conversations', { replace: true, state: { forceRefresh: true } })
+      window.location.reload()
+    })
+
+    return () => {
+      socket.off('receiveMessage')
+      socket.off('conversationClosed')
+    }
+  }, [navigate, messagesQuery])
+
   if (conversation.isLoading) return (
     <Skeleton variant="rounded" width={210} height={60} />
   )
@@ -117,8 +138,7 @@ export function ConversationScreen() {
   if (!conversation.data) throw new Error('Failed to laod conversation')
 
   const handleCloseConversation = () => {
-    navigate('/conversations', { replace: true, state: { forceRefresh: true } })
-    window.location.reload()
+    close.mutate();
   }
 
   return (
