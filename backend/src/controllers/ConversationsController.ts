@@ -14,14 +14,17 @@ export class ConversationsController {
    * GET /conversations
    */
   public async find(req: Request, res: Response) {
+    const { page = 1 } = req.query;
+    const pageNumber = parseInt(page as string, 10)
+    const conversationsPerPage = 15
+
     const [conversations, count] = await this.repository.findAndCount({
       relations: { consumer: true, user:true },
-      take: 25,
-      skip: 0,
-
+      take: conversationsPerPage,
+      skip: (pageNumber - 1) * conversationsPerPage,
     })
 
-    res.json({ count, conversations })
+    res.json({ count, conversations, conversationsPerPage })
   }
 
   /**

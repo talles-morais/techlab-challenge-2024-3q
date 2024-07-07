@@ -1,6 +1,5 @@
 import { ListItem, ListItemButton, ListItemIcon, ListItemText, Paper, Typography } from "@mui/material";
 import { IConversation } from "../interfaces/IConversation.js";
-import { Link } from "react-router-dom";
 import ChatBubbleIcon from '@mui/icons-material/ChatBubble';
 import { useMemo } from "react";
 
@@ -18,7 +17,6 @@ export function ConversationItem({ conversation }: ConversationItemProps) {
   return (
     <Paper>
       <Typography variant="body1" gutterBottom>
-        <Link to={`/conversations/${conversation.id}`}>
           <ListItem disablePadding>
             <ListItemButton>
               <ListItemIcon>
@@ -27,7 +25,6 @@ export function ConversationItem({ conversation }: ConversationItemProps) {
               <ListItemText style={{ whiteSpace: 'nowrap' }} primary={conversation.subject} secondary={consumerIdentifier}/>
             </ListItemButton>
           </ListItem>
-        </Link>
       </Typography>
     </Paper>
   )
