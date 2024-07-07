@@ -42,7 +42,7 @@ export function ConversationsScreen() {
 
   return (
     <Grid container pl={0.1}>
-      <Grid padding={10}>
+      <Grid paddingX={10}>
         <Box
           style={{
             display: 'flex',

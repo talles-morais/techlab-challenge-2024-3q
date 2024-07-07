@@ -48,7 +48,7 @@ export function ConversationScreen() {
         messages: IConversationMessage[]
       }
     },
-    refetchInterval: 20 * 1000
+    refetchInterval: 100
   })
 
   const send = useMutation({
