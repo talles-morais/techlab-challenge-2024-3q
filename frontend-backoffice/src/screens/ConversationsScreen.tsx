@@ -1,4 +1,4 @@
-import { Grid } from "@mui/material";
+import { Box, Grid } from "@mui/material";
 import { useAccessToken, useAuthenticatedUser } from "../hooks/useAuthenticationContext.js";
 import { useQuery } from "@tanstack/react-query";
 import { api } from "../services/api.js";
@@ -33,15 +33,25 @@ export function ConversationsScreen() {
   return (
     <Grid container spacing={2} pl={0.1}>
       <Grid item xs={2}>
-        <Grid container spacing={1}>
+        <Box 
+          style={{ 
+            padding: 20, 
+            display: 'flex', 
+            flexDirection: 'column', 
+            flexWrap: 'wrap', 
+            height: '40%', 
+            gap: 16, 
+            justifyContent: 'space-between',
+             
+          }}>
           {conversations?.filter(
             (conversation) => user.profile === "sudo" ? true : conversation.user?.id === user.id)
             .map((conversation) => (
-              <Grid item key={`conversations:${conversation.id}`}>
+              <Grid style={{ }} item key={`conversations:${conversation.id}`}>
                 <ConversationItem conversation={conversation} />
               </Grid>
             ))}
-        </Grid>
+        </Box>
       </Grid>
       <Grid item xs={10}>
         <Outlet />

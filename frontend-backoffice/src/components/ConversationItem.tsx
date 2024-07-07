@@ -24,7 +24,7 @@ export function ConversationItem({ conversation }: ConversationItemProps) {
               <ListItemIcon>
                 <ChatBubbleIcon />
               </ListItemIcon>
-              <ListItemText primary={conversation.subject} secondary={consumerIdentifier}/>
+              <ListItemText style={{ whiteSpace: 'nowrap' }} primary={conversation.subject} secondary={consumerIdentifier}/>
             </ListItemButton>
           </ListItem>
         </Link>
