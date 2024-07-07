@@ -1,4 +1,4 @@
-import { createContext, PropsWithChildren, useMemo, useState } from "react";
+import { createContext, PropsWithChildren, useEffect, useMemo, useState } from "react";
 import { IUser } from "../interfaces/IUser.js";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { api } from "../services/api.js";
@@ -25,12 +25,13 @@ export interface IAuthenticationContext {
 export const AuthenticationContext = createContext(null as unknown as IAuthenticationContext)
 
 export function AuthenticationProvider({ children }: PropsWithChildren) {
-  const [accessToken, setAccessToken] = useState<string | null>(null)
+  const [accessToken, setAccessToken] = useState(() => localStorage.getItem('session:access-token') ?? null)
   const signIn = useMutation({
     mutationFn: async ({ username, password }: IAuthenticationSignInPayload) => {
       const response = await api.post('/auth/sign-in', { username, password })
 
       setAccessToken(response.data.access_token)
+      localStorage.setItem('session:access-token', response.data.access_token)
     },
   })
 
@@ -73,6 +74,14 @@ export function AuthenticationProvider({ children }: PropsWithChildren) {
   const isLoading = useMemo(() => userQuery.isLoading || signIn.isPending, [signIn.isPending, userQuery.isLoading])
 
   const value = useMemo(() => ({ token, accessToken, user, isLoading, signIn: signIn.mutate }), [token, accessToken, user, isLoading, signIn.mutate])
+
+  useEffect(() => {
+    if (accessToken) {
+      localStorage.setItem('session:access-token', accessToken);
+    } else {
+      localStorage.removeItem('session:access-token');
+    }
+  }, [accessToken]);
 
   return (
     <AuthenticationContext.Provider value={value}>
