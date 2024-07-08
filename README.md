@@ -1,107 +1,63 @@
 # Tech Lab Challenge 2024 3q
 
-Esse projeto é uma aplicação de chat para consumidores e atendentes, com interfaces próprias para cada um. Porém, as aplicações ainda têm alguns bugs, problemas de desempenho, falhas de segurança e funcionalidades que não foram implementadas.
+## Sobre minha jornada no desafio
 
-O seu desafio é resolver esses problemas e adicionar as funcionalidades que estão faltando para que o sistema funcione de forma correta.
+Para começar, gostaria de agradecer ao pessoal da Tech4Humans pelo apoio e mentorias, foram de grande ajuda e se mostraram interessados e disponíveis em ajudar.
 
-Vocês têm a liberdade de começar por onde se sentirem confortável, implementando da forma que acharem melhor. Também pode realizar as edições que achar necessário para que o desenvolvimento alcance o objetivo desejado.
+Minhas principais dificuldades foram:
+ - **Tempo:** O período de realização do desafio coincidiu com o fim do semestre e, consequentemente, época de provas, o que gerou alguns obstáculos e eu não consegui dedicar tanto tempo quanto desejava. Porém, com algumas medidas de gestão de tempo, acredito que consegui realizar o necessário para satisfazer os critérios do desafio.
+ - **Novas tecnologias:** Algumas tecnologias utilizadas no projeto são novas para mim, tive alguma dificuldade em aprender a interpretá-las, mas acredito que me adaptei bem e consegui utilizá-las de forma satisfatória.
 
-Refatorações completas são aceitas, inclusive de linguagens de programação, desde que o objetivo seja alcançado.
+Meus principais acertos e avanços:
+ - **Docker:** Sempre ouvi falar da ferramenta e tentei utilizá-la em outras ocasiões, porém sem sucesso. Neste projeto decidi aproveitar a possibilidade de usá-lo e me desafiar a aprender, considero que foi um grande sucesso, pois a facilidade que trouxe em configurar um container para rodar o banco de dados e poder acessá-lo apenas passando a URL foi um grande diferencial.
+ - **Revisão de código:** Ter a possibilidade de pegar um projeto iniciado e ter que revê-lo, identificar seus problemas e resolvê-los foi uma experiência nova pra mim durante a graduação, a oportunidade de ver quão diferente pode ser o processo de estruturação de um aplicativo como esse me motivou a me aprofundar mais na área e procurar outras soluções para ferramentas que já estava acostumado a usar.
+ - **Uso do Trello:** Devido a necessidade de organizar minha gestão de tempo devido as tarefas da universidade e pouco tempo disponível, fiz uso do Trello para criar um quadro Kanban e categorizar, por níveis de prioridade, as funcionalidades e bugs que eu desejava desenvolver ou consertar primeiro. Esta decisão foi crucial para conseguir terminar o que foi proposto.
 
-## Começando
+ ## Problemas resolvidos
 
-Para começar, você precisa fazer um fork desse repositório e cloná-lo para a sua máquina.
+- ### Falha de segurança - Senha no banco de dados
+  Minha primeira ação depois de iniciar o migration dos dados, foi explorar o banco de dados, e logo quando visualizei os dados armazenados na tabela users me deparei com a senha do usuário root armazenado em texto pleno, sem criptografia.
+  **Solução:** Utilizei o pacote bcrypt para fazer a hash da senha no momento da migração.
+  **Commit referente:** [Commit: hash password](https://github.com/talles-morais/techlab-challenge-2024-3q/commit/534e3fe7969e30f9e1765ca368d58daa7a6da82a)
 
-O projeto foi testado utilizando a verão 20 e 22 do Node.js, então é recomendado que você utilize uma dessas versões.
+  Também adicionei a criptografia para a rota de criação de novos usuários.
+  **Commit referente:** [Commit: new user hash password](https://github.com/talles-morais/techlab-challenge-2024-3q/commit/9b74f4eb783418f32341d8610c5f7f89bc182df0)
 
-O projeto está utilizando yarn v4, então é bom ter a documentação em mãos para eventuais dúvidas, poucas coisas mudam, mas é sempre por se atualizar.
+- ### Falha de segurança - Permissão de usuário
+  O usuário standard tinha a possibilidade de criar um novo usuário, (até mesmo um usuário com permissão sudo), o que pode gerar uma brecha para invasores escalarem privilégios no sistema.
+  **Solução:** Remover as permissões do atendente e ocultar a área de edição de usuários, deixando essa tarefa apenas para administradores.
+  **Commit referente:** [Commit: user permissions](https://github.com/talles-morais/techlab-challenge-2024-3q/commit/24b60d2a20f2dc005e25033f9511d4c9b32e6c23)
 
-## Objetivo
+- ### User Story - O Atendente ver apenas conversas atribuidas a ele
+  **Solução:** Adicionei uma verificação na página onde estão disponíveis as conversas onde usuários sudo podem ver todas e atendentes apenas podem ver conversas atribuídas ao seu id.
+  **Commit referente:** [Commit](https://github.com/talles-morais/techlab-challenge-2024-3q/commit/156eecc705e276772f803fef8c1fd735e17511e9)
 
-O objetivo é corrigir os problemas existentes e adicionar as funcionalidades que estão faltando para que o sistema funcione de forma correta. Você pode acompanhar a lista [BACKLOG AQUI](./BACKLOG.md)
+- ### User Story - Sistema de distribuição de atendimento
+  **Solução:** Utilizei uma fila circular (inspirado no algoritmo round robin), para distribuir igualmente as conversas conforme elas forem iniciadas. O que pode ser aprimorado futuramente com um sistema de disponibilidade dos atendentes.
+  **Commit referente:** [Commit: round robin](https://github.com/talles-morais/techlab-challenge-2024-3q/commit/5ebae8a6c61e3e1b275cbdd75161a47380ddd25f)
 
-Deverá ser entregue pelo menos **seis features** e **duas correções de bugs**. Sendo que duas features estão listadas como obrigatórias no backlog. Você consegue identificar quais são pelo simbolo de <span style='color: red'>*</span> ao lado do nome.
+- ### Bug - Atualização de usuários não está funcionando
+  O erro encontrado era porque o método PUT estava tentando sobrescrever **todos** os campos do usuário, o que gerava conflito com a chave configurada no banco de dados(o campo userId).
+  **Solução:** Substitui o método PUT pelo PATCH, que aplica transformações parciais no destino, o que não altera o id do usuário.
+  **Commit referente:** [Commit: update user](https://github.com/talles-morais/techlab-challenge-2024-3q/commit/688502af44a05094d32fab6087740a7985275048)
+  **Extra:** A rota de atualização do usuário também não encriptava a senha antes de salvá-lo, a solução para este problema também está no commit acima.
 
-Temos 4 bugs escondidos na aplicação que não estão listados no backlog, sendo que 2 deles são vulnerabilidades críticas de segurança, então fique atento.
+- ### User Story - Criação de outros usuários
+  **Solução:** Foi criado um componente de formulário para a criação de novos usuários, que também contou com a função para criptografar a senha do novo usuário.
+  **Commit referente:** [Commit: new user form](https://github.com/talles-morais/techlab-challenge-2024-3q/commit/67a4c55df06fe7cf1a6ee8ccf9a581e9e0772fac)
 
-Muitos dos itens do backlog são interdependentes, então é importante que vocês tenham uma visão geral do que está sendo feito.
+- ### User Story - Persistencia na sessão do atendente
+  **Solução:** Uma solução simples para persistir a sessão do atendente é armazenar o token de acesso localmente no navegador, o que pode ser aprimorado futuramente com o uso de cookies httpOnly para prevenir possíveis ataques XSS e CSRF.
+  **Commit referente:** [Commit: local storage](https://github.com/talles-morais/techlab-challenge-2024-3q/commit/d65c4ce4684c53701010f30392864046cf2d50dc)
 
-Como vocês podem ver, o backlog é extenso de proposito, para que vocês possam escolher o que querem fazer, e o que acham que é mais importante. Alguns features listadas ali não agregam valor ao produto, justamente para entendermos o senso de priorização de vocês.
+- ### Bug - Não está sendo carregado mais que 25 resultados na api
+  Esse bug se deve a requisição ao banco de dados em ConversationsController que limita o número de objetos requisitados 25.
+  **Solução:** Uma solução possível para esse problema é agrupar estas conversas em páginas para poder visualizar separadamente os dados sem poluição visual.
+  **Commit referente:** [Commit: pagination](https://github.com/talles-morais/techlab-challenge-2024-3q/commit/c35b3ae9a30bbe9b66f8c4e903ecdde51f963ba1)
+  Configurei apenas 15 por lista por uma questão prática, isto pode ser facilmente alterado, colocando o número desejado de itens por página na constante referente.
 
-## Critérios de avaliação
-
-- **Funcionalidade**: O sistema deve funcionar corretamente e atender aos requisitos propostos.
-- **Entregas**: Deverá ser entregue pelo menos **seis features (user story, história de usuário)** e **duas correções de bugs**. Sendo que duas features estão listadas como obrigatórias no backlog. Você consegue identificar quais são pelo simbolo de <span style='color: red'>*</span> ao lado do nome. Mas sinta-se a vontade para implementar mais features e correções de bugs.
-- **Qualidade do código**: Quanto mais qualidade, melhor!
-- **Senso de prioridade**: A priorização das features é um ponto importante, então escolha bem o que você vai fazer.
-- **Commits**: Commits bem feitos e organizados são um ponto positivo.
-- **Refatoração** - **Opcional**: A refatoração do código é bem-vinda, o código se encontra sem qualidade, então uma refatoração cairia bem.
-- **Reescrita** - **Opcional**: A reescrita do código é bem-vinda, sinta-se a vontade para reescrever a aplicação da maneira que bem entender em qualquer linguagem comercialmente estável no mercado, exemplo: Java, Ruby, Python, JavaScript, etc. Porém tome muito cuidado com a linguagem escolhida, caso ela seja muito diferente do que foi proposto, isso pode ser um ponto negativo na avaliação. Alguns pontos de atenção são a alteração dos arquivos Docker da aplicação, e a alteração do arquivo `README.md` para que a aplicação possa ser executada. Caso não se sinta 100% confiante com essa abordagem, não faça.
-- **Funcionalidades extras** - **Opcional**: Funcionalidades extras são bem-vindas, mas não são obrigatórias. Caso você tenha tempo e queira adicionar algo a mais, sinta-se à vontade, mas não esqueça de sinalizar isso de alguma forma, por exemplo, no `README.md`. Caso ache necessário, você pode gravar um vídeo explicando as funcionalidades extras e enviar para [force@tech4h.com.br](mailto:force@tech4h.com.br), não se esqueça de se identificar corretamente.
-
-## Dicas
-
-- Leia a documentação dos frameworks e bibliotecas utilizadas.
-- Testes unitários podem agregar um valor imenso as features entregues.
-- Utilize o Docker para subir o ambiente de desenvolvimento.
-- Alguns bugs acontecem rapidamente na aplicação, então recomendamos que você reconstrua o ambiente para a investigação dos problemas (ou pelo menos limpe as tabelas).
-- O Backend está utilizando o TypeORM, então você pode utilizar o TypeORM CLI para criar migrations e rodar as migrations. Leia a documentação do TypeORM para mais informações.
-- O Frontend está utilizando o Vite, então você pode utilizar o Vite CLI para rodar o projeto. Leia a documentação do Vite para mais informações.
-- Algumas features do backlog vão quebrar o backend, então fique atento a isso.
-- Muitas features dependem de outras, conhecidas como o famoso `block by`. Isso não está explicito no backlog, então fique atento.
-- Backlog é extenso, e nem todas solicitadas fazem sentido, **NÃO É OBRIGATÓRIO** fazer todas, escolha bem o que você vai fazer.
-
-## Datas
-
-Os desenvolvimentos devem ser enviados para análise até o dia 07/07 às 23:59.
-
-As mentorias ocorrerão entre os dias 25/06 e 05/07, das 08h às 19h. Elas devem ser agendadas com pelo menos 4 hora de antecedência.
-
-É necessário realizar pelo menos uma mentorias de até 15 minutos cada. A participação nas mentorias é obrigatória tanto para o recebimento do prêmio quanto para a candidatura à vaga de estágio.
-
-## Mentorias
-
-As mentorias podem ser agendados pelos links do calendar. Cada um dos mentores tem a sua própria agenda.
-
-A participação nas mentorias é obrigatória tanto para o recebimento do prêmio quanto para a candidatura à vaga de estágio, ela terá a duração de 15 minutos, então uma dica, venha com perguntas prontas.
-
-Caso nenhum dos horários se encaixe com a sua disponibilidade, envie um e-mail para [force@tech4h.com.br](mailto:force@tech4h.com.br) e tentaremos encontrar um horário que funcione para todos.
-
-- Tony: https://calendar.app.google/YH1BTog3uUZKidjw8
-- Gustey: https://calendar.app.google/gDF7Vc62fTQdvm2W7
-- Fabio: https://calendar.app.google/huvq2ytbv8bkNZ92A
-
-## Como entregar o meu projeto?
-
-Para entregar o seu projeto, você deve enviar um e-mail para [force@tech4h.com.br](mailto:force@tech4h.com.br) com o link do seu repositório e o seu nome, caso você entregue com um email diferente da inscrição é necessário a sinalização no e-mail.
-
-## Links úteis
-
-### Documentações
-
-- https://docs.docker.com/
-- https://nodejs.org/en/docs/
-- https://reactjs.org/docs/getting-started.html
-- https://vitejs.dev/guide/
-- https://socket.io/docs/v4/index.html
-- https://expressjs.com/pt-br/
-- https://typeorm.io/#/
-- https://yarnpkg.com/getting-started/usage
-- https://docs.docker.com/compose/
-
-### Design pattern
-
-- https://www.hostgator.com.br/blog/design-patterns-e-seus-beneficios
-- https://www.slideshare.net/slideshow/boas-praticas-de-programacao-com-object-calisthenics/267739583#19
-- https://medium.com/desenvolvendo-com-paixao/o-que-%C3%A9-solid-o-guia-completo-para-voc%C3%AA-entender-os-5-princ%C3%ADpios-da-poo-2b937b3fc530
-
-### Boas práticas
-
-- https://www.sensedia.com.br/post/api-boas-praticas-de-paginacao-e-filtros
-- https://www.vaadata.com/blog/how-to-securely-store-passwords-in-database
-
-### Outros
-
-- https://asdf-vm.com/
-- https://github.com/asdf-vm/asdf-nodejs
-- https://github.com/nvm-sh/nvm
+- ### User Story - Entrega de mensagens em tempo real como Consumidor
+- ### User Story - Entrega de mensagens e conversas em tempo real como Atendente
+  Minha primeira tentativa foi tentar abaixar o tempo de refresh da página, porém percebi que isso poderia criar problemas de desempenho, então tentei seguir por outro caminho.
+  **Solução:** Essas funcionalidades podem ser resolvidas adotando o uso da biblioteca Socket.IO, que possibilita a comunicação entre cliente e servidor através de uma conexão WebSocket.
+  **Commit referente:** [Commit: websocket](https://github.com/talles-morais/techlab-challenge-2024-3q/commit/2ca047382343ab8a32628a9101886c820b6a2559)
